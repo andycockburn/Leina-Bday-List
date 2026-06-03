@@ -1,10 +1,15 @@
-import { kv } from "@vercel/kv";
+import { Redis } from "@upstash/redis";
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
 
 const KEY = "leina-birthday-claims";
 
 export async function GET() {
   try {
-    const data = await kv.get(KEY);
+    const data = await redis.get(KEY);
     return Response.json(data || {});
   } catch (e) {
     return Response.json({});
@@ -14,7 +19,7 @@ export async function GET() {
 export async function POST(req) {
   try {
     const body = await req.json();
-    await kv.set(KEY, body);
+    await redis.set(KEY, body);
     return Response.json({ ok: true });
   } catch (e) {
     return Response.json({ ok: false }, { status: 500 });
